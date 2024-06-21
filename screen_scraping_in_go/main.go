@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -13,10 +14,20 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+var headless = flag.Bool("headless", false, "run scraper in headless mode (no UI)")
+
 func main() {
+	flag.Parse()
 	ctx := context.Background()
 
-	scraper := scrapers.NewHeadedScraper(ctx)
+	var scraper *scrapers.Scraper
+	if *headless {
+		fmt.Printf("Running in headless mode\n")
+		scraper = scrapers.NewHeadlessScraper(ctx)
+	} else {
+		fmt.Printf("Running in headed mode\n")
+		scraper = scrapers.NewHeadedScraper(ctx)
+	}
 	defer scraper.Cancel()
 
 	// Scrape recipes example
