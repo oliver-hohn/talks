@@ -42,12 +42,14 @@ func ScrapeRecipes(s *scrapers.Scraper) ([]*Recipe, error) {
 func navigateToRecipes() []chromedp.Action {
 	return []chromedp.Action{
 		chromedp.Navigate(BASE_URL + "/recipes/collection/easy-dinner-recipes"),
+		scrapers.Log("Navigated to recipes"),
 	}
 }
 
 func acceptCookies() []chromedp.Action {
 	return []chromedp.Action{
 		chromedp.Click(`//button[contains(text(), 'Accept All')]`),
+		scrapers.Log("Accepted cookies"),
 	}
 }
 
@@ -58,6 +60,7 @@ func readRecipes(recipes *[]*Recipe) []chromedp.Action {
 		if err := chromedp.Nodes(`//article[@data-item-type='recipe']`, &recipeArticleNodes).Do(ctx); err != nil {
 			return err
 		}
+		fmt.Printf("Found %d recipes to scrape\n", len(recipeArticleNodes))
 
 		// For each, find the path to the recipe
 		recipeURLs := make([]*url.URL, len(recipeArticleNodes))
@@ -73,9 +76,11 @@ func readRecipes(recipes *[]*Recipe) []chromedp.Action {
 			}
 
 			recipeURLs[i] = u
+			fmt.Printf("Found recipe at %s\n", u.String())
 		}
 
 		for _, u := range recipeURLs {
+			fmt.Printf("Scraping recipe at %s\n", u.String())
 			if err := chromedp.Navigate(u.String()).Do(ctx); err != nil {
 				return err
 			}
@@ -125,6 +130,7 @@ func PostComment(s *scrapers.Scraper, c *Credentials, recipeURL *url.URL, commen
 func navigateToRecipe(recipeURL *url.URL) []chromedp.Action {
 	return []chromedp.Action{
 		chromedp.Navigate(recipeURL.String()),
+		scrapers.Log("Navigated to recipe: " + recipeURL.String()),
 	}
 }
 
@@ -135,6 +141,7 @@ func logIn(credentials *Credentials) []chromedp.Action {
 		chromedp.SendKeys(`//input[@name='email']`, credentials.Username),
 		chromedp.SendKeys(`//input[@name='password']`, credentials.Password),
 		chromedp.Click(`//button[contains(descendant::text(), 'Log in')]`),
+		scrapers.Log("Logged in"),
 	}
 }
 
@@ -142,5 +149,6 @@ func writeComment(comment string) []chromedp.Action {
 	return []chromedp.Action{
 		chromedp.Click(`//span[contains(text(), 'Comment')]`),
 		chromedp.SendKeys(`//textarea`, comment),
+		scrapers.Log("Wrote comment"),
 	}
 }
