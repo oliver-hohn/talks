@@ -25,14 +25,14 @@ type Recipe struct {
 }
 
 func ScrapeRecipes(s *scrapers.Scraper) ([]*Recipe, error) {
-	steps := []chromedp.Action{}
-	steps = append(steps, navigateToRecipes()...)
-	steps = append(steps, acceptCookies()...)
+	actions := []chromedp.Action{}
+	actions = append(actions, navigateToRecipes()...)
+	actions = append(actions, acceptCookies()...)
 
 	var recipes []*Recipe
-	steps = append(steps, readRecipes(&recipes)...)
+	actions = append(actions, readRecipes(&recipes)...)
 
-	if err := s.Run(steps...); err != nil {
+	if err := s.Run(actions...); err != nil {
 		return nil, fmt.Errorf("unable to scrape recipes: %w", err)
 	}
 
@@ -48,7 +48,7 @@ func navigateToRecipes() []chromedp.Action {
 
 func acceptCookies() []chromedp.Action {
 	return []chromedp.Action{
-		chromedp.Click(`//button[contains(text(), 'Accept All')]`),
+		scrapers.Measure(chromedp.Click(`//button[contains(text(), 'Accept All')]`)),
 		scrapers.Log("Accepted cookies"),
 	}
 }
@@ -114,13 +114,13 @@ func readRecipes(recipes *[]*Recipe) []chromedp.Action {
 }
 
 func PostComment(s *scrapers.Scraper, c *Credentials, recipeURL *url.URL, comment string) error {
-	steps := []chromedp.Action{}
-	steps = append(steps, navigateToRecipe(recipeURL)...)
-	steps = append(steps, acceptCookies()...)
-	steps = append(steps, logIn(c)...)
-	steps = append(steps, writeComment(comment)...)
+	actions := []chromedp.Action{}
+	actions = append(actions, navigateToRecipe(recipeURL)...)
+	actions = append(actions, acceptCookies()...)
+	actions = append(actions, logIn(c)...)
+	actions = append(actions, writeComment(comment)...)
 
-	if err := s.Run(steps...); err != nil {
+	if err := s.Run(actions...); err != nil {
 		return fmt.Errorf("unable to post comment: %w", err)
 	}
 
