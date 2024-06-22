@@ -52,6 +52,21 @@ func NewHeadedScraper(ctx context.Context) *Scraper {
 	}
 }
 
+func NewRemoteScraper(ctx context.Context, remoteURL string) *Scraper {
+	cancelFuncs := []context.CancelFunc{}
+
+	allowCtx, cancel := chromedp.NewRemoteAllocator(ctx, remoteURL)
+	cancelFuncs = append(cancelFuncs, cancel)
+
+	chromeCtx, cancel := chromedp.NewContext(allowCtx, chromedp.WithErrorf(log.Printf))
+	cancelFuncs = append(cancelFuncs, cancel)
+
+	return &Scraper{
+		cancelFuns: cancelFuncs,
+		chromeCtx:  chromeCtx,
+	}
+}
+
 func (s *Scraper) Cancel() {
 	for _, cancel := range s.cancelFuns {
 		cancel()

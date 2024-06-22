@@ -14,21 +14,26 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var headless = flag.Bool("headless", false, "run scraper in headless mode (no UI)")
+var mode = flag.String("mode", "headed", "mode to run the scraper in: headed, headless, and remote")
 
 func main() {
 	flag.Parse()
 	ctx := context.Background()
 
 	var scraper *scrapers.Scraper
-	if *headless {
-		fmt.Printf("Running in headless mode\n")
-		scraper = scrapers.NewHeadlessScraper(ctx)
-	} else {
+	switch *mode {
+	case "headed":
 		fmt.Printf("Running in headed mode\n")
 		scraper = scrapers.NewHeadedScraper(ctx)
+	case "headless":
+		fmt.Printf("Running in headless mode\n")
+		scraper = scrapers.NewHeadlessScraper(ctx)
+	case "remote":
+		fmt.Printf("Running in remote mode\n")
+		scraper = scrapers.NewRemoteScraper(ctx, "http://localhost:9222")
+	default:
+		log.Fatalf("invalid mode: %s", *mode)
 	}
-	defer scraper.Cancel()
 
 	// Scrape recipes example
 	recipes, err := bbcgoodfood.ScrapeRecipes(scraper)

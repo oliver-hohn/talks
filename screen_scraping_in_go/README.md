@@ -6,11 +6,22 @@
 1. Install Docker Desktop: https://docs.docker.com/desktop/
 
 ## Run locally
-1. Run the script:
+1. Run:
    ```
    go run main.go
    ```
-   _`--headless` can be provided as an option to run in "headless" mode (without a UI)_
+   _`--mode=headless` can be provided as an option to run in "headless" mode (without a UI)_
+
+### Run with a remote instance of Chrome
+1. Start the remote Chrome instance via Docker-Compose (starts on port 9222):
+   ```
+   docker-compose up
+   ```
+1. Run:
+   ```
+   go run main.go --mode=remote
+   ```
+
 
 ## Run via Docker
 1. Build the container:

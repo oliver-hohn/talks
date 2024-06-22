@@ -37,4 +37,4 @@ RUN addgroup -g 10001 -S appgroup && \
   chown -R appuser:appgroup /app/
 
 USER appuser
-ENTRYPOINT [ "/app/scraper", "--headless" ]
+ENTRYPOINT [ "/app/scraper", "--mode=headless" ]
